@@ -63,7 +63,9 @@ async def read_meme(meme_id: int, body : Body):
     result = await database.execute(query)
     if(result==0): 
         raise HTTPException(status_code=404, detail="Item not found")
-    return {"id" : meme_id, "url" :body.url, "caption" : body.caption}
+    query = memes.select().where(memes.c.id == meme_id)
+    result = await database.fetch_one(query)
+    return result
 
 @app.delete("/memes/{meme_id}",  status_code = status.HTTP_200_OK)
 async def read_meme(meme_id: int):
