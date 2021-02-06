@@ -32,13 +32,13 @@ async def home():
     return {"message" : "welcome perul jain"}
 
 @app.post("/memes", status_code = status.HTTP_201_CREATED)
-async def create_meme(name:str, caption:str, url:str):
-    query = memes.select().where(memes.c.name==name and memes.c.url==url and memes.c.caption==caption)
+async def create_meme(meme : MemeIn):
+    query = memes.select().where(memes.c.name==meme.name and memes.c.url==meme.url and memes.c.caption==meme.caption)
     result = await database.fetch_one(query)
     if(result):
         raise HTTPException(status_code=409, detail="Meme already exists")
     
-    query = memes.insert().values(name=name, caption=caption, url=url)
+    query = memes.insert().values(name=meme.name, caption=meme.caption, url=meme.url)
     last_record_id = await database.execute(query)
     return {"id": last_record_id}
 
