@@ -44,9 +44,9 @@ async def create_meme(meme: MemeIn):
 
 @app.get("/memes", response_model=List[Meme], status_code = status.HTTP_200_OK)
 async def read_memes(skip: int = 0, take: int = 100):
-    query = memes.select().offset(skip).limit(take)
+    query = memes.select().order_by('caption').offset(skip).limit(take)
     result = await database.fetch_all(query)
-    return result[::-1]
+    return result
 
 @app.get("/memes/{meme_id}", response_model=Meme, status_code = status.HTTP_200_OK)
 async def read_meme(meme_id: int):
