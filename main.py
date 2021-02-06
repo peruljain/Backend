@@ -32,13 +32,13 @@ async def home():
     return {"message" : "welcome perul jain"}
 
 @app.post("/memes", status_code = status.HTTP_201_CREATED)
-async def create_meme(meme: MemeIn):
-    query = memes.select().where(memes.c.name==meme.name and memes.c.url==meme.url and memes.c.caption==meme.caption)
+async def create_meme(name:str, caption:str, url:str):
+    query = memes.select().where(memes.c.name==name and memes.c.url==url and memes.c.caption==caption)
     result = await database.fetch_one(query)
     if(result):
         raise HTTPException(status_code=409, detail="Meme already exists")
     
-    query = memes.insert().values(name=meme.name, caption=meme.caption, url=meme.url)
+    query = memes.insert().values(name=name, caption=caption, url=url)
     last_record_id = await database.execute(query)
     return {"id": last_record_id}
 
@@ -63,12 +63,14 @@ async def read_meme(meme_id: int, body : Body):
     result = await database.execute(query)
     if(result==0): 
         raise HTTPException(status_code=404, detail="Item not found")
-    return {"message" : "updated successfully"}
+    query = memes.select().where(memes.c.id == meme_id)
+    result = await database.fetch_one(query)
+    return result
 
 @app.delete("/memes/{meme_id}",  status_code = status.HTTP_200_OK)
 async def read_meme(meme_id: int):
     query = memes.delete().where(memes.c.id == meme_id)
     result = await database.execute(query)
-    if(result==None): 
+    if(result==0): 
         raise HTTPException(status_code=404, detail="Meme not found")
     return {"message" : "deleted successfully"}
